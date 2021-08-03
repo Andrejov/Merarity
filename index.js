@@ -7,7 +7,7 @@ const app = express();
 const cfg = new Merarity.MerarityConfig('./config.json', logger);
 const bot = new Merarity.Merarity(cfg, logger);
 
-app.get('', (req,res) => {
+app.get('/', (req,res) => {
     res.writeHead(200);
     res.write('Merarity is working');
 });
