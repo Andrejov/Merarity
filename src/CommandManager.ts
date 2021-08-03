@@ -2,6 +2,8 @@ import { Message } from "discord.js";
 import { Command } from "./Command";
 import { ICommandModule } from "./CommandModule";
 import { Administration } from "./Commands/Administration";
+import { Utility } from "./Commands/Utility";
+import { Context } from "./Context";
 import { Embed } from "./Embed";
 import { Logger } from "./Logger";
 import { Merarity } from "./Merarity";
@@ -31,11 +33,17 @@ export class CommandManager
         this.commands = [];
         this.aliases = {};
 
-        this.loadModule(new Administration());
+        this.loadModules();
 
         this.refreshAliases();
 
         this.logger.info(`Loaded ${this.commands.length} commands and ${Object.keys(this.aliases).length} aliases`)
+    }
+
+    loadModules()
+    {
+        this.loadModule(new Administration());
+        this.loadModule(new Utility());
     }
 
     loadModule(module: ICommandModule)
@@ -83,10 +91,24 @@ export class CommandManager
 
         if(cmd)
         {
-            const clean = msg.content.trim();
-            const args = clean.split(' ');
+            // const clean = msg.content.trim();
+            // const args = clean.split(' ');
+            const ctx = new Context(msg, cmd.syntax);
 
-            return cmd.callback(msg, this.bot, args);
+            await ctx.parse(this.bot);
+
+            if(!ctx.valid)
+            {
+                return Response.bad(
+                    ctx.invalid!=undefined ? cmd.syntax[ctx.invalid] : '',
+                    `Use: ${this.prefix}${cmd.aliases[0]} ` + 
+                    cmd.syntax.map(p => p.startsWith('o') ? `[${p.substr(1)}]` : `<${p}>`)
+                        .map((p,i) => i==ctx.invalid ? `**${p}**` : p)    
+                        .join(' ')
+                );
+            }
+
+            return await cmd.callback(msg, this.bot, ctx);
         }
 
         return Response.empty();
@@ -105,6 +127,7 @@ export class CommandManager
                 response = await this.handleCommand(msg, cmd);
             } catch (error) {
                 this.logger.warn(`Unhandled exception executing command ${cmd.aliases[0]}`);
+                this.logger.warn(`Contents: ${error}`);
                 response = Response.err('Unknown error');
             }
 
@@ -114,10 +137,26 @@ export class CommandManager
             }else if(response.status == ResponseStatus.BAD_PARAMS)
             {
                 await msg.react('⚠️');
-                // Embed.send(msg.channel, '')
-            }else if(response.status == ResponseStatus.ERROR)
+                await Embed.send(msg.channel, [
+                    'Your command syntax was wrong',
+                    `Bad parameter: ${response.param ?? 'UNKNOWN'}`,
+                    `${response.message ?? ''}`
+                ], 'Bad request');
+            }else if(response.status == ResponseStatus.INSUFFICIENT_PERMS)
             {
                 await msg.react('⛔');
+                await Embed.send(msg.channel, [
+                    'Unfortunately, you dont have enough permissions to execute this command',
+                    `Missing permission: **${response.param ?? 'UNKNOWN'}**`
+                ], 'Insufficient permissions');
+            }else if(response.status == ResponseStatus.ERROR)
+            {
+                await msg.react('❌');
+                await Embed.send(msg.channel, [
+                    'Unfortunately, bot has encountered an (yet) unknown error',
+                    'There is nothing we can do about it now',
+                    response.message ?? '',
+                ], 'Error');
             }
 
             return true;

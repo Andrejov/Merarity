@@ -25,7 +25,7 @@ export class Merarity
         this.client.on('message', this.onMessage.bind(this));
     }
 
-    run()
+    async run()
     {
         this.logger.info("Starting Merarity bot...");
         this.client.login(this.config.auth.discordkey);
@@ -36,6 +36,12 @@ export class Merarity
     private async onReady(): Promise<void>
     {
         this.logger.info("Bot ready.")
+
+        await this.client.user?.setActivity({
+            type: 'STREAMING',
+            name: 'Work in progress...',
+            url: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ'
+        })
     }
 
     private async onMessage(msg: Message): Promise<void>

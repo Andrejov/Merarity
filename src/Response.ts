@@ -17,9 +17,9 @@ export class Response
         return new Response(ResponseStatus.OK);
     }
 
-    static bad(param?: string)
+    static bad(param?: string, msg?: string)
     {
-        return new Response(ResponseStatus.BAD_PARAMS, '', param);
+        return new Response(ResponseStatus.BAD_PARAMS, msg ?? '', param);
     }
 
     static err(msg?: string)
@@ -31,6 +31,11 @@ export class Response
     {
         return new Response(ResponseStatus.EMPTY);
     }
+
+    static perms(perm?: string)
+    {
+        return new Response(ResponseStatus.INSUFFICIENT_PERMS, '', perm);
+    }
 }
 
 export enum ResponseStatus
@@ -39,4 +44,5 @@ export enum ResponseStatus
     OK = 0,
     BAD_PARAMS = 1,
     ERROR = 2,
+    INSUFFICIENT_PERMS = 3,
 }

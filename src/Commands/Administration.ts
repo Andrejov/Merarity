@@ -1,6 +1,7 @@
 import { Message } from "discord.js";
 import { Command } from "../Command";
 import { ICommandModule } from "../CommandModule";
+import { Context } from "../Context";
 import { Embed } from "../Embed";
 import { Merarity } from "../Merarity";
 import { Response } from "../Response";
@@ -9,7 +10,7 @@ export class Administration implements ICommandModule
 {
     commands(): Command[] {
         return [
-            new Command('ping', async (msg: Message, bot: Merarity, args: string[]) => {
+            new Command('ping', [], async (msg: Message, bot: Merarity, args: Context) => {
                 await Embed.send(msg.channel,
                     [
                         `Latency:`,
