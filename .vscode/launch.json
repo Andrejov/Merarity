@@ -9,7 +9,7 @@
             "request": "launch",
             "name": "Compile && launch",
             "runtimeExecutable": "npm",
-            "runtimeArgs": ["start"]
+            "runtimeArgs": ["test"]
         }
     ]
 }
