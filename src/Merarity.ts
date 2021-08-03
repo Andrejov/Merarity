@@ -12,7 +12,7 @@ export class Merarity
 
     commandManager: CommandManager;
 
-    constructor(config: MerarityConfig,logger?: Logger)
+    constructor(config: MerarityConfig, logger?: Logger)
     {
         this.logger = logger ?? new Logger();
         this.config = config;

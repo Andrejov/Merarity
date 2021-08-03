@@ -1,4 +1,5 @@
 import fs from 'fs';
+import { Logger } from './Logger';
 
 export class MerarityConfig
 {
@@ -6,20 +7,36 @@ export class MerarityConfig
         discordkey: ""
     }
 
-    load(path: string)
+    logger: Logger;
+
+    loadJSON(path: string)
     {
-        const contents = fs.readFileSync(path).toString();
+        if(fs.existsSync(path))
+        {
+            const contents = fs.readFileSync(path).toString();
 
-        const json = JSON.parse(contents);
+            const json = JSON.parse(contents);
 
-        this.auth.discordkey = json.auth.discordkey;
+            this.auth.discordkey = json.auth.discordkey;
+        }else{
+            this.logger.warn('Config file does not exist');
+        }
     }
 
-    constructor(path?: string)
+    loadEnv()
     {
+        this.auth.discordkey = process.env.DISCORDKEY ?? this.auth.discordkey;
+    }
+
+    constructor(path?: string, logger?: Logger)
+    {
+        this.logger = logger ?? new Logger();
+
         if(path)
         {
-            this.load(path);
+            this.loadJSON(path);
         }
+
+        this.loadEnv();
     }
 }
