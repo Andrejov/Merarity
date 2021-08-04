@@ -36,6 +36,11 @@ export class Response
     {
         return new Response(ResponseStatus.INSUFFICIENT_PERMS, '', perm);
     }
+
+    static delete()
+    {
+        return new Response(ResponseStatus.DELETE);
+    }
 }
 
 export enum ResponseStatus
@@ -45,4 +50,5 @@ export enum ResponseStatus
     BAD_PARAMS = 1,
     ERROR = 2,
     INSUFFICIENT_PERMS = 3,
+    DELETE = 4,
 }

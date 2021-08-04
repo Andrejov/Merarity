@@ -1,7 +1,8 @@
 import { Client, Message } from "discord.js";
 import { CommandManager } from "./CommandManager";
-import { Logger } from "./Logger";
+import { Logger } from "./Util/Logger";
 import { MerarityConfig } from "./MerarityConfig";
+import { ServiceManager } from "./ServiceManager";
 
 export class Merarity
 {
@@ -11,6 +12,7 @@ export class Merarity
     client: Client;
 
     commandManager: CommandManager;
+    serviceManager: ServiceManager;
 
     constructor(config: MerarityConfig, logger?: Logger)
     {
@@ -19,7 +21,8 @@ export class Merarity
 
         this.client = new Client();
 
-        this.commandManager = new CommandManager(this, logger);
+        this.commandManager = new CommandManager(this, logger?.child('MGR:CMD'));
+        this.serviceManager = new ServiceManager(this, logger?.child('MGR:SVC'));
 
         this.client.on('ready', this.onReady.bind(this));
         this.client.on('message', this.onMessage.bind(this));
@@ -30,18 +33,15 @@ export class Merarity
         this.logger.info("Starting Merarity bot...");
         this.client.login(this.config.auth.discordkey);
 
+        this.serviceManager.load();
+
         this.commandManager.load();
     }
 
     private async onReady(): Promise<void>
     {
         this.logger.info("Bot ready.")
-
-        await this.client.user?.setActivity({
-            type: 'STREAMING',
-            name: 'Work in progress...',
-            url: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ'
-        })
+        await this.serviceManager.register();
     }
 
     private async onMessage(msg: Message): Promise<void>

@@ -1,4 +1,4 @@
-import { Message, TextChannel, VoiceChannel } from "discord.js";
+import { Message, TextChannel, User, VoiceChannel } from "discord.js";
 import { Merarity } from "./Merarity";
 
 export class Context
@@ -41,6 +41,12 @@ export class Context
         this.command = split.shift() ?? '';
 
         this.pattern.forEach((p, i) => {
+            if(this.invalid)
+            {
+                this.values.push(undefined);
+                return;
+            }
+
             const optional = p.startsWith('o');
             if(optional) p = p.substr(1) as ContextElement;
 
@@ -51,6 +57,8 @@ export class Context
                 if(p == 'text')
                 {
                     return this.values.push(raw);
+                }else if(p == 'bigtext'){
+                    return this.values.push([...split].splice(i).join(' '));
                 }else if(p == 'number')
                 {
                     const nan = +raw;
@@ -68,10 +76,41 @@ export class Context
                     if(user)
                     {
                         return this.values.push(user);
-                    }else{
-                        this.valid = false;
-                        this.invalid = i;
                     }
+
+                    let found: User | undefined;
+                    
+                    found = this.message.guild?.members.cache.array().find(usr => 
+                        usr.nickname && usr.nickname.trim().toLowerCase() == raw.trim().toLowerCase())?.user;
+                    if(found)
+                    {
+                        return this.values.push(found);
+                    }
+
+                    found = this.message.guild?.members.cache.array().find(usr => 
+                        usr.nickname && usr.nickname.toLowerCase().indexOf(raw.trim().toLowerCase()) > -1)?.user;
+                    if(found)
+                    {
+                        return this.values.push(found);
+                    }
+                    
+                    found = bot.client.users.cache.array().find(usr => 
+                        usr.username.trim().toLowerCase() == raw.trim().toLowerCase())
+                    if(found)
+                    {
+                        return this.values.push(found);
+                    }
+
+                    found = bot.client.users.cache.array().find(usr => 
+                        usr.username.toLowerCase().indexOf(raw.trim().toLowerCase()) > -1);
+                    if(found)
+                    {
+                        return this.values.push(found);
+                    }
+
+
+                    this.valid = false;
+                    this.invalid = i;
                 }else if(p == 'channel')
                 {
                     const ch = bot.client.channels.cache
@@ -123,5 +162,6 @@ export type ContextElementOptional = '' | 'o';
 export type ContextElementType =
     'number' |
     'text' |
+    'bigtext' |
     'mention' |
     'channel';

@@ -6,15 +6,18 @@ const logger = new Merarity.Logger();
 
 const app = express();
 const cfg = new Merarity.MerarityConfig('./config.json', logger);
+cfg.loadJSON('./auth.json');
 const bot = new Merarity.Merarity(cfg, logger);
 
 app.get('/', (req,res) => {
     res.send('Merarity is working');
 });
 
+
+bot.run();
+
 // eslint-disable-next-line no-undef
 app.listen(process.env.PORT || 5000);
-bot.run();
 
 function keepAlive()
 {

@@ -1,13 +1,14 @@
-import { Message } from "discord.js";
-import { Command } from "./Command";
-import { ICommandModule } from "./CommandModule";
-import { Administration } from "./Commands/Administration";
-import { Utility } from "./Commands/Utility";
+import { DMChannel, Message } from "discord.js";
+import { Command } from "./Model/Command";
+import { ICommandModule } from "./Model/CommandModule";
+import { AdministrationModule } from "./Commands/Administration.module";
+import { FunnyModule } from "./Commands/Funny.module";
+import { UtilityModule } from "./Commands/Utility.module";
 import { Context } from "./Context";
-import { Embed } from "./Embed";
-import { Logger } from "./Logger";
+import { Embed } from "./Util/Embed";
+import { Logger } from "./Util/Logger";
 import { Merarity } from "./Merarity";
-import { Response, ResponseStatus } from "./Response";
+import { Response, ResponseStatus } from "./Model/Response";
 
 export class CommandManager
 {
@@ -42,13 +43,30 @@ export class CommandManager
 
     loadModules()
     {
-        this.loadModule(new Administration());
-        this.loadModule(new Utility());
+        this.loadModule(new AdministrationModule());
+        this.loadModule(new UtilityModule());
+        this.loadModule(new FunnyModule());
     }
 
     loadModule(module: ICommandModule)
     {
-        module.commands().forEach(cmd => this.loadCommand(cmd));
+        module.commands()
+            .map(cmd => {
+                if(module.perms)
+                {
+                    cmd.callback = async(msg, bot, args) => {
+                        const req = module.perms?.find(perm => !msg.member?.hasPermission(perm));
+                        if(req)
+                        {
+                            return Response.perms(req)
+                        }
+
+                        return cmd.callback(msg,bot,args);
+                    };
+                }
+                return cmd;
+            })
+            .forEach(cmd => this.loadCommand(cmd));
     }
 
     loadCommand(cmd: Command)
@@ -116,10 +134,22 @@ export class CommandManager
 
     async onMessage(msg: Message): Promise<boolean>
     {
+        if(msg.author.bot) return false;
+        if(msg.channel instanceof DMChannel && msg.content.trim().startsWith(this.prefix))
+        {
+            await msg.react('⚠️');
+            await Embed.send(msg, [
+                `Unfortunately, this bot is disabled for DM channels`,
+                `You can only use Merarity commands on connected guilds`
+            ], `Unsupported`);
+            return false;
+        }
+
         const cmd = this.getCommand(msg);
 
         if(cmd)
         {
+
             this.logger.trace(`Handling command ${cmd.aliases[0]}`)
             let response;
 
@@ -157,6 +187,9 @@ export class CommandManager
                     'There is nothing we can do about it now',
                     response.message ?? '',
                 ], 'Error');
+            }else if(response.status == ResponseStatus.DELETE)
+            {
+                await msg.delete();
             }
 
             return true;

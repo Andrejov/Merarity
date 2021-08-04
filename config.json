@@ -1,0 +1,7 @@
+{
+    "service_mc" : {
+        "ip" : "kokscraft.pl",
+        "online" : "${players}/${maxplayers}",
+        "offline" : "Server is offline ;-;"
+    }
+}

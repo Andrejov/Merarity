@@ -1,6 +1,6 @@
 import { Message } from "discord.js";
-import { Context, ContextElement } from "./Context";
-import { Merarity } from "./Merarity";
+import { Context, ContextElement } from "../Context";
+import { Merarity } from "../Merarity";
 import { Response } from "./Response";
 
 export class Command

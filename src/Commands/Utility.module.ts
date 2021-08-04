@@ -1,12 +1,13 @@
 import { VoiceChannel } from "discord.js";
-import { Command } from "../Command";
-import { ICommandModule } from "../CommandModule";
-import { Embed } from "../Embed";
-import { Logger } from "../Logger";
-import { Response } from "../Response";
+import { Command } from "../Model/Command";
+import { ICommandModule } from "../Model/CommandModule";
+import { Embed } from "../Util/Embed";
+import { Logger } from "../Util/Logger";
+import { Response } from "../Model/Response";
 
-export class Utility implements ICommandModule
+export class UtilityModule implements ICommandModule
 {
+    perms = [];
 
     commands(): Command[] {
         return [

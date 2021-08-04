@@ -1,10 +1,15 @@
 import fs from 'fs';
-import { Logger } from './Logger';
+import { Logger } from './Util/Logger';
 
 export class MerarityConfig
 {
     auth = {
         discordkey: ""
+    }
+    service_mc = {
+        ip: "",
+        offline: "",
+        online: "",
     }
 
     logger: Logger;
@@ -17,9 +22,17 @@ export class MerarityConfig
 
             const json = JSON.parse(contents);
 
-            this.auth.discordkey = json.auth.discordkey;
+            const sections: ConfigSection[] = ['auth', 'service_mc']
+
+            sections.forEach(sect => {
+                if(json[sect])
+                {
+                    this.logger.trace(`Loading ${sect.toUpperCase()} config`);
+                    Object.assign(this[sect], json[sect]);
+                }
+            })
         }else{
-            this.logger.warn('Config file does not exist');
+            this.logger.warn(`Config file ${path.split('/').splice(-2).join('/')} does not exist`);
         }
     }
 
@@ -40,3 +53,5 @@ export class MerarityConfig
         this.loadEnv();
     }
 }
+
+export type ConfigSection = 'auth' | 'service_mc';
