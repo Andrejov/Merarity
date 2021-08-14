@@ -1,0 +1,16 @@
+[Unit]
+Description=Node SRV %i
+After=network.target
+
+[Service]
+WorkingDirectory=/home/mc/%i
+
+User=mc
+Group=mc
+
+Restart=always
+
+ExecStart=node /home/mc/%i/index.js
+
+[Install]
+WantedBy=multi-user.target
