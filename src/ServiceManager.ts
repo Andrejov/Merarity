@@ -23,7 +23,7 @@ export class ServiceManager
     {
         this.services = [];
         this.services.push(new ActivityService(this));
-        // this.services.push(new MinecraftService(this));
+        this.services.push(new MinecraftService(this));
     }
 
     async register()

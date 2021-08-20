@@ -10,6 +10,7 @@ export class MerarityConfig
         ip: "",
         offline: "",
         online: "",
+        port: 0,
     }
 
     logger: Logger;

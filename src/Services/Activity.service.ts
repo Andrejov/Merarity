@@ -3,7 +3,7 @@ import { Service } from "../Model/Service";
 export class ActivityService extends Service
 {
     status = {
-        text: "Work in progress...",
+        text: "Loading...",
         link: "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
     };
 

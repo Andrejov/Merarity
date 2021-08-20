@@ -1,7 +1,8 @@
 {
     "service_mc" : {
-        "ip" : "kokscraft.pl",
-        "online" : "${players}/${maxplayers}",
-        "offline" : "Server is offline ;-;"
+        "ip" : "nesmc.ddns.net",
+        "port": 25566,
+        "online" : "nesmc.ddns.net ✔️",
+        "offline" : "nesmc.ddns.net ❌"
     }
 }
